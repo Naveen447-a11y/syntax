@@ -1,0 +1,10 @@
+# SafeCampus Disaster Preparedness System
+# Frontend Web Application Dependencies
+
+HTML5
+CSS3
+JavaScript (ES6)
+
+# Optional libraries (if used)
+Bootstrap
+Font Awesome
