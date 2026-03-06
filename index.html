@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeCampus – Disaster Preparedness System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --surface: #111827;
+            --surface2: #1a2236;
+            --border: rgba(255, 255, 255, 0.07);
+            --text: #e8edf5;
+            --muted: #6b7a99;
+            --accent: #f97316;
+            --accent2: #3b82f6;
+            --success: #22c55e;
+            --warn: #eab308;
+            --danger: #ef4444;
+            --radius: 14px;
+            --radius-lg: 22px;
+            --dis-hue: #f97316;
+            --dis-glow: rgba(249, 115, 22, 0.18);
+        }
+
+        :root.light {
+            --bg: #f0f4f8;
+            --surface: #ffffff;
+            --surface2: #e8edf5;
+            --border: rgba(0, 0, 0, 0.09);
+            --text: #0f172a;
+            --muted: #64748b;
+        }
+
+        /* THEME TOGGLE */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 4px;
+            flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
+            width: 60px;
+            height: 32px;
+            transition: background .3s, border-color .3s;
+        }
+
+        .theme-toggle-thumb {
+            position: absolute;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            background: var(--dis-hue);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: .75rem;
+            transition: transform .3s cubic-bezier(.4, 0, .2, 1), background .5s;
+            box-shadow: 0 2px 8px var(--dis-glow);
+            line-height: 1;
+        }
+
+        :root.light .theme-toggle-thumb {
+            transform: translateX(28px);
+        }
+
+        .theme-toggle-bg {
+            position: absolute;
+            right: 8px;
+            font-size: .7rem;
+            opacity: .5;
+            transition: opacity .3s;
+            pointer-events: none;
+        }
+
+        :root.light .theme-toggle-bg {
+            right: auto;
+            left: 8px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: .5;
+            transition: opacity .4s;
+        }
+
+        :root.light body::before {
+            opacity: .15;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/webp;base64,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");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: 420px 420px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.06;
+            transition: opacity .4s;
+        }
+
+        :root.light body::after {
+            opacity: 0.09;
+        }
+
+
+
+        /* HEADER */
+        header {
+            position: relative;
+            z-index: 10;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(17, 24, 39, .97) 0%, transparent 100%);
+            backdrop-filter: blur(12px);
+            flex-wrap: wrap;
+            transition: background .3s, border-color .3s;
+        }
+
+        :root.light header {
+            background: linear-gradient(180deg, rgba(255,255,255,.97) 0%, transparent 100%);
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--dis-hue);
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 0 24px var(--dis-glow);
+            transition: background .5s, box-shadow .5s
+        }
+
+        .header-text h1 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            letter-spacing: -.02em;
+            line-height: 1.1
+        }
+
+        .header-text p {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 300;
+            margin-top: 2px
+        }
+
+        /* LIVE CLOCK */
+        .datetime-pill {
+            margin-left: auto;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 6px 14px;
+            font-size: .72rem;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .day-chip {
+            background: var(--dis-hue);
+            color: #fff;
+            font-size: .6rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            padding: 2px 7px;
+            border-radius: 99px;
+            transition: background .5s
+        }
+
+        /* AUTH BUTTON */
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 7px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .75rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .auth-btn:hover {
+            border-color: var(--dis-hue)
+        }
+
+        .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--dis-hue);
+            display: grid;
+            place-items: center;
+            font-size: .7rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: background .5s
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%
+        }
+
+        .status-badge {
+            padding: 5px 13px;
+            border-radius: 99px;
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            transition: all .4s;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .status-badge.prepared {
+            color: var(--success);
+            border-color: var(--success);
+            background: rgba(34, 197, 94, .1)
+        }
+
+        .status-badge.needs-improvement {
+            color: var(--warn);
+            border-color: var(--warn);
+            background: rgba(234, 179, 8, .1)
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 10, 18, .88);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform .3s
+        }
+
+        .modal-overlay.open .modal {
+            transform: none
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 1rem;
+            transition: all .2s
+        }
+
+        .modal-close:hover {
+            border-color: var(--danger);
+            color: var(--danger)
+        }
+
+        .modal-logo {
+            width: 54px;
+            height: 54px;
+            background: var(--dis-hue);
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 28px var(--dis-glow);
+            transition: background .5s
+        }
+
+        .modal h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 5px
+        }
+
+        .modal-sub {
+            text-align: center;
+            color: var(--muted);
+            font-size: .8rem;
+            margin-bottom: 22px
+        }
+
+        /* TABS */
+        .auth-tabs {
+            display: flex;
+            background: var(--surface2);
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 20px
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--muted);
+            font-family: 'Syne', sans-serif;
+            font-size: .75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .auth-tab.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .3)
+        }
+
+        /* PANELS */
+        .auth-panel {
+            display: none
+        }
+
+        .auth-panel.active {
+            display: block
+        }
+
+        .otp-step {
+            display: none
+        }
+
+        .otp-step.active {
+            display: block
+        }
+
+        /* GOOGLE BTN */
+        .google-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 13px 20px;
+            background: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            font-weight: 600;
+            color: #1f2937;
+            cursor: pointer;
+            transition: all .2s;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .2)
+        }
+
+        .google-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .3)
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            color: var(--muted);
+            font-size: .72rem
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        /* FIELDS */
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        .field label {
+            font-size: .7rem;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: .06em;
+            text-transform: uppercase
+        }
+
+        .field input {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            padding: 12px 16px;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none
+        }
+
+        .field input:focus {
+            border-color: var(--dis-hue);
+            box-shadow: 0 0 0 3px var(--dis-glow)
+        }
+
+        .field input::placeholder {
+            color: var(--muted)
+        }
+
+        /* OTP BOXES */
+        .otp-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 10px 0
+        }
+
+        .otp-box {
+            width: 48px;
+            height: 54px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-align: center;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            caret-color: var(--dis-hue)
+        }
+
+        .otp-box:focus {
+            border-color: var(--dis-hue);
+            box-shadow: 0 0 0 3px var(--dis-glow)
+        }
+
+        /* BTN */
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background: var(--dis-hue);
+            border: none;
+            border-radius: var(--radius);
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: .9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s, transform .2s;
+            box-shadow: 0 4px 20px var(--dis-glow);
+            margin-top: 8px
+        }
+
+        .btn-primary:hover {
+            opacity: .9;
+            transform: translateY(-1px)
+        }
+
+        .btn-primary:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        .auth-msg {
+            font-size: .78rem;
+            text-align: center;
+            padding: 9px 14px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none
+        }
+
+        .auth-msg.error {
+            background: rgba(239, 68, 68, .12);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, .3);
+            display: block
+        }
+
+        .auth-msg.success {
+            background: rgba(34, 197, 94, .12);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, .3);
+            display: block
+        }
+
+        .auth-msg.info {
+            background: rgba(59, 130, 246, .12);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, .3);
+            display: block
+        }
+
+        .spinner {
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .resend-row {
+            text-align: center;
+            margin-top: 12px;
+            font-size: .78rem;
+            color: var(--muted)
+        }
+
+        .resend-link {
+            color: var(--dis-hue);
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        /* LAYOUT */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 28px 16px 60px;
+            display: grid;
+            gap: 20px
+        }
+
+        @media(min-width:700px) {
+            .container {
+                padding: 32px 28px 80px
+            }
+
+            .grid-2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px
+            }
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .4s
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--dis-hue);
+            opacity: .7;
+            transition: background .5s
+        }
+
+        .card-label {
+            font-family: 'Syne', sans-serif;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 7px
+        }
+
+        .card-label .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--dis-hue);
+            transition: background .5s;
+            box-shadow: 0 0 8px var(--dis-glow)
+        }
+
+        /* SELECTOR */
+        .select-wrap {
+            position: relative
+        }
+
+        .disaster-select {
+            width: 100%;
+            appearance: none;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 16px 50px 16px 20px;
+            cursor: pointer;
+            transition: border-color .3s, box-shadow .3s;
+            letter-spacing: .03em;
+            outline: none
+        }
+
+        .disaster-select:focus {
+            border-color: var(--dis-hue);
+            box-shadow: 0 0 0 3px var(--dis-glow)
+        }
+
+        .disaster-select option {
+            background: var(--surface);
+            color: var(--text)
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--muted)
+        }
+
+        .disaster-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 16px
+        }
+
+        .chip {
+            padding: 7px 16px;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            font-size: .78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .chip:hover {
+            border-color: var(--dis-hue);
+            color: var(--text)
+        }
+
+        .chip.active {
+            background: var(--dis-hue);
+            border-color: var(--dis-hue);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 0 18px var(--dis-glow)
+        }
+
+        /* SAFETY PANEL */
+        #safety-panel {
+            display: none
+        }
+
+        #safety-panel.visible {
+            display: block
+        }
+
+        .disaster-hero {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--surface2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border)
+        }
+
+        .disaster-icon-big {
+            font-size: 2.4rem;
+            line-height: 1;
+            filter: drop-shadow(0 0 12px var(--dis-hue));
+            transition: filter .5s
+        }
+
+        .disaster-hero-text h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--dis-hue);
+            transition: color .5s
+        }
+
+        .disaster-hero-text p {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-top: 3px
+        }
+
+        .actions-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--surface2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            animation: slideIn .35s ease both
+        }
+
+        .action-item:nth-child(1) {
+            animation-delay: .05s
+        }
+
+        .action-item:nth-child(2) {
+            animation-delay: .12s
+        }
+
+        .action-item:nth-child(3) {
+            animation-delay: .19s
+        }
+
+        .action-item:nth-child(4) {
+            animation-delay: .26s
+        }
+
+        .action-item:nth-child(5) {
+            animation-delay: .33s
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .action-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: var(--dis-hue);
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: .75rem;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            transition: background .5s
+        }
+
+        .action-text {
+            font-size: .9rem;
+            line-height: 1.45;
+            padding-top: 4px
+        }
+
+        /* QUEUE */
+        .queue-section {
+            margin-top: 18px;
+            padding: 16px;
+            background: var(--surface2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border)
+        }
+
+        .queue-label {
+            font-family: 'Syne', sans-serif;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .queue-run-btn {
+            background: var(--dis-hue);
+            border: none;
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            padding: 4px 11px;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: opacity .2s
+        }
+
+        .queue-run-btn:hover {
+            opacity: .85
+        }
+
+        .queue-track {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            min-height: 36px;
+            align-items: center
+        }
+
+        .q-node {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: .72rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            transition: all .3s
+        }
+
+        .q-node.processing {
+            background: var(--dis-hue);
+            color: #fff;
+            border-color: var(--dis-hue);
+            box-shadow: 0 0 14px var(--dis-glow);
+            transform: scale(1.08)
+        }
+
+        .q-node.done {
+            background: var(--surface2);
+            color: var(--success);
+            border-color: var(--success);
+            opacity: .7
+        }
+
+        .queue-log {
+            margin-top: 10px;
+            font-size: .75rem;
+            color: var(--accent2);
+            min-height: 20px;
+            font-family: 'DM Sans', monospace
+        }
+
+        /* CHECKLIST */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 16px;
+            background: var(--surface2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            user-select: none
+        }
+
+        .check-item:hover {
+            border-color: var(--dis-hue)
+        }
+
+        .check-item.checked {
+            border-color: var(--success);
+            background: rgba(34, 197, 94, .07)
+        }
+
+        .check-box {
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            transition: background .2s, border-color .2s, transform .15s;
+            color: #fff
+        }
+
+        .check-item.checked .check-box {
+            background: var(--success);
+            border-color: var(--success);
+            transform: scale(1.1)
+        }
+
+        .check-label {
+            font-size: .88rem;
+            line-height: 1.35
+        }
+
+        /* SCORE RING */
+        .score-wrap {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 18px;
+            background: var(--surface2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 18px
+        }
+
+        .ring-svg {
+            flex-shrink: 0
+        }
+
+        .ring-bg {
+            fill: none;
+            stroke: var(--surface);
+            stroke-width: 6
+        }
+
+        .ring-arc {
+            fill: none;
+            stroke: var(--success);
+            stroke-width: 6;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset .6s cubic-bezier(.4, 0, .2, 1), stroke .4s
+        }
+
+        .ring-text {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: .9rem;
+            fill: var(--text);
+            text-anchor: middle;
+            dominant-baseline: middle
+        }
+
+        .ring-sub {
+            font-size: .35rem;
+            fill: var(--muted);
+            text-anchor: middle;
+            font-family: 'DM Sans', sans-serif
+        }
+
+        .score-info h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700
+        }
+
+        .score-info p {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        .score-bar-wrap {
+            margin-top: 12px
+        }
+
+        .score-bar-track {
+            height: 6px;
+            background: var(--surface);
+            border-radius: 99px;
+            overflow: hidden
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent2), var(--success));
+            border-radius: 99px;
+            transition: width .6s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        /* CONTACTS */
+        .contacts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px
+        }
+
+        @media(min-width:500px) {
+            .contacts-grid {
+                grid-template-columns: repeat(4, 1fr)
+            }
+        }
+
+        .contact-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px
+        }
+
+        .contact-card:hover {
+            border-color: var(--dis-hue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, .3)
+        }
+
+        .contact-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 1.4rem;
+            border: 1px solid var(--border)
+        }
+
+        .contact-name {
+            font-family: 'Syne', sans-serif;
+            font-size: .73rem;
+            font-weight: 700;
+            line-height: 1.2
+        }
+
+        .contact-number {
+            font-size: .9rem;
+            font-weight: 500;
+            color: var(--dis-hue);
+            transition: color .5s
+        }
+
+        /* JSON */
+        .json-wrap {
+            background: #0a0d14;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            overflow-x: auto
+        }
+
+        .json-wrap pre {
+            font-family: 'Courier New', monospace;
+            font-size: .78rem;
+            line-height: 1.7;
+            color: #a9b1d6;
+            white-space: pre
+        }
+
+        .json-key {
+            color: #7aa2f7
+        }
+
+        .json-str {
+            color: #9ece6a
+        }
+
+        .json-num {
+            color: #ff9e64
+        }
+
+        .json-copy-btn {
+            margin-top: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .75rem;
+            padding: 7px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .json-copy-btn:hover {
+            border-color: var(--dis-hue);
+            color: var(--text)
+        }
+
+        /* ALERT */
+        .alert-banner {
+            display: none;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: .83rem;
+            font-weight: 500;
+            border: 1px solid;
+            animation: pulse 2s infinite;
+            align-items: center;
+            gap: 10px
+        }
+
+        .alert-banner.visible {
+            display: flex
+        }
+
+        .alert-banner.danger {
+            background: rgba(239, 68, 68, .1);
+            border-color: var(--danger);
+            color: #fca5a5
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .7
+            }
+        }
+
+        /* WHATSAPP EMERGENCY */
+        .whatsapp-card {
+            background: var(--surface);
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .3s, box-shadow .3s;
+        }
+
+        .whatsapp-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: #25d366;
+        }
+
+        .whatsapp-card:hover {
+            border-color: rgba(37, 211, 102, 0.6);
+            box-shadow: 0 0 32px rgba(37, 211, 102, 0.1);
+        }
+
+        .whatsapp-icon-wrap {
+            width: 52px;
+            height: 52px;
+            background: #25d366;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(37, 211, 102, 0.35);
+        }
+
+        .whatsapp-info {
+            flex: 1;
+        }
+
+        .whatsapp-info h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: .95rem;
+            font-weight: 800;
+            margin-bottom: 3px;
+        }
+
+        .whatsapp-info p {
+            font-size: .78rem;
+            color: var(--muted);
+        }
+
+        .whatsapp-info .wa-number {
+            font-size: .8rem;
+            font-weight: 600;
+            color: #25d366;
+            margin-top: 2px;
+        }
+
+        .whatsapp-btn {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: #25d366;
+            border: none;
+            border-radius: var(--radius);
+            padding: 11px 20px;
+            font-family: 'Syne', sans-serif;
+            font-size: .82rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-btn:hover {
+            background: #1ebe5d;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+        }
+
+        .whatsapp-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes wa-ping {
+            0% { transform: scale(1); opacity: 1; }
+            70% { transform: scale(1.6); opacity: 0; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        .wa-pulse {
+            position: relative;
+            display: inline-flex;
+        }
+
+        .wa-pulse::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: #25d366;
+            animation: wa-ping 2s ease-out infinite;
+        }
+
+        @media(max-width:600px) {
+            .whatsapp-card {
+                flex-wrap: wrap;
+            }
+            .whatsapp-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* FOOTER */
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 24px 20px;
+            color: var(--muted);
+            font-size: .72rem;
+            border-top: 1px solid var(--border);
+            line-height: 2.2
+        }
+
+        /* FADE UP */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .5s ease, transform .5s ease
+        }
+
+        .fade-up.in {
+            opacity: 1;
+            transform: none
+        }
+
+        @media(max-width:480px) {
+            .card {
+                padding: 18px
+            }
+
+            header {
+                padding: 12px 14px;
+                gap: 8px
+            }
+
+            .datetime-pill {
+                display: none
+            }
+
+            .modal {
+                padding: 22px 16px
+            }
+
+            .otp-box {
+                width: 40px;
+                height: 48px;
+                font-size: 1.2rem
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══ AUTH MODAL ══ -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="modal-logo" id="modal-logo">🛡️</div>
+            <h2>Join SafeCampus</h2>
+            <p class="modal-sub">Sign up or log in to track your preparedness</p>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('signup')">Sign Up</button>
+                <button class="auth-tab" onclick="switchTab('login')">Log In</button>
+            </div>
+
+            <!-- GOOGLE -->
+            <button class="google-btn" onclick="signInWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#EA4335"
+                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                    <path fill="#4285F4"
+                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                    <path fill="#FBBC05"
+                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                    <path fill="#34A853"
+                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                </svg>
+                Continue with Google
+            </button>
+
+            <div class="auth-divider">or use email OTP</div>
+
+            <!-- SIGNUP -->
+            <div class="auth-panel active" id="panel-signup">
+                <div class="otp-step active" id="signup-step1">
+                    <div class="field-group">
+                        <div class="field"><label>Full Name</label><input type="text" id="signup-name"
+                                placeholder="e.g. Arjun Sharma" /></div>
+                        <div class="field"><label>Email Address</label><input type="email" id="signup-email"
+                                placeholder="you@university.edu" /></div>
+                    </div>
+                    <button class="btn-primary" id="send-otp-btn" onclick="sendOTP()">Send OTP →</button>
+                    <div class="auth-msg" id="signup-msg"></div>
+                </div>
+                <div class="otp-step" id="signup-step2">
+                    <p style="font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:14px">Enter the
+                        6-digit code
+                        sent to <strong id="otp-email-display" style="color:var(--text)"></strong></p>
+                    <div class="otp-group" id="otp-group">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                    </div>
+                    <button class="btn-primary" id="verify-otp-btn" onclick="verifyOTP()">Verify & Enter →</button>
+                    <div class="auth-msg" id="otp-msg"></div>
+                    <div class="resend-row">Didn't get it? <span class="resend-link" id="resend-link"
+                            onclick="resendOTP()">Resend
+                            OTP</span><span id="resend-timer" style="display:none"></span></div>
+                </div>
+            </div>
+
+            <!-- LOGIN -->
+            <div class="auth-panel" id="panel-login">
+                <div class="otp-step active" id="login-step1">
+                    <div class="field"><label>Email Address</label><input type="email" id="login-email"
+                            placeholder="you@university.edu" /></div>
+                    <button class="btn-primary" id="send-login-otp-btn" onclick="sendLoginOTP()">Send Login OTP
+                        →</button>
+                    <div class="auth-msg" id="login-msg"></div>
+                </div>
+                <div class="otp-step" id="login-step2">
+                    <p style="font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:14px">Enter the
+                        6-digit code
+                        sent to <strong id="login-email-display" style="color:var(--text)"></strong></p>
+                    <div class="otp-group" id="login-otp-group">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" />
+                    </div>
+                    <button class="btn-primary" onclick="verifyLoginOTP()">Verify & Log In →</button>
+                    <div class="auth-msg" id="login-otp-msg"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══ HEADER ══ -->
+    <header>
+        <div class="logo-icon" id="logo-icon">🛡️</div>
+        <div class="header-text">
+            <h1>SafeCampus</h1>
+            <p>Disaster Preparedness System</p>
+        </div>
+
+        <div class="datetime-pill">
+            <span class="day-chip" id="live-day">MON</span>
+            <span id="live-date">1 Jan 2025</span>
+            &nbsp;·&nbsp;
+            <span id="live-time">00:00:00</span>
+        </div>
+
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">
+            <span class="theme-toggle-bg" id="theme-toggle-bg">🌙</span>
+            <div class="theme-toggle-thumb" id="theme-toggle-thumb">☀️</div>
+        </button>
+
+        <button class="auth-btn" id="auth-btn" onclick="openModal()">
+            <div class="avatar" id="header-avatar">?</div>
+            <span id="header-auth-label">Sign Up</span>
+        </button>
+
+        <div class="status-badge" id="status-badge">Standby</div>
+    </header>
+
+    <!-- ══ MAIN ══ -->
+    <main class="container">
+
+        <div class="card fade-up">
+            <div class="card-label"><span class="dot"></span>Step 1 — Select Disaster Type</div>
+            <div class="select-wrap">
+                <select class="disaster-select" id="disaster-select">
+                    <option value="">— Choose a disaster scenario —</option>
+                    <option value="EARTHQUAKE">🌍 EARTHQUAKE</option>
+                    <option value="FIRE">🔥 FIRE</option>
+                    <option value="FLOOD">🌊 FLOOD</option>
+                    <option value="CYCLONE">🌀 CYCLONE</option>
+                </select>
+                <span class="select-arrow">▾</span>
+            </div>
+            <div class="disaster-chips">
+                <div class="chip" data-disaster="EARTHQUAKE">🌍 Earthquake</div>
+                <div class="chip" data-disaster="FIRE">🔥 Fire</div>
+                <div class="chip" data-disaster="FLOOD">🌊 Flood</div>
+                <div class="chip" data-disaster="CYCLONE">🌀 Cyclone</div>
+            </div>
+        </div>
+
+        <div class="alert-banner danger" id="alert-banner">
+            <span>⚠️</span><span id="alert-text">Emergency scenario active.</span>
+        </div>
+
+        <div class="card fade-up" id="safety-panel">
+            <div class="card-label"><span class="dot"></span>Step 2 — Immediate Safety Actions</div>
+            <div class="disaster-hero">
+                <div class="disaster-icon-big" id="dis-icon">🌍</div>
+                <div class="disaster-hero-text">
+                    <h2 id="dis-title">EARTHQUAKE</h2>
+                    <p id="dis-subtitle">Follow these steps in order. Stay calm.</p>
+                </div>
+            </div>
+            <ul class="actions-list" id="actions-list"></ul>
+            <div class="queue-section">
+                <div class="queue-label">
+                    <span>🔁 Evacuation Route Queue Simulation</span>
+                    <button class="queue-run-btn" onclick="runEvacuationQueue()">▶ Simulate</button>
+                </div>
+                <div class="queue-track" id="queue-track"></div>
+                <div class="queue-log" id="queue-log">Press Simulate to run the evacuation queue algorithm.</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card fade-up">
+                <div class="card-label"><span class="dot"></span>Step 3 — Preparedness Checklist</div>
+                <div class="score-wrap">
+                    <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+                        <circle class="ring-bg" cx="32" cy="32" r="26" />
+                        <circle class="ring-arc" id="ring-arc" cx="32" cy="32" r="26" stroke-dasharray="163.36"
+                            stroke-dashoffset="163.36" />
+                        <text class="ring-text" x="32" y="31" id="ring-pct">0%</text>
+                        <text class="ring-sub" x="32" y="42">score</text>
+                    </svg>
+                    <div class="score-info">
+                        <h3 id="score-label">Not Checked</h3>
+                        <p id="score-desc">Complete all items to reach 100%.</p>
+                        <div class="score-bar-wrap">
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" id="score-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="checklist" id="checklist"></div>
+            </div>
+
+            <div class="card fade-up">
+                <div class="card-label"><span class="dot"></span>Step 4 — Emergency Contacts</div>
+                <div class="contacts-grid" id="contacts-grid"></div>
+            </div>
+        </div>
+
+        <div class="whatsapp-card fade-up">
+            <div class="whatsapp-icon-wrap">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 2C8.268 2 2 8.268 2 16c0 2.478.675 4.8 1.848 6.793L2 30l7.395-1.82A13.93 13.93 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2z" fill="#fff"/>
+                    <path d="M16 4.4A11.6 11.6 0 014.4 16c0 2.122.572 4.11 1.572 5.82l.243.42-1.03 3.764 3.872-1.015.41.237A11.556 11.556 0 0016 27.6 11.6 11.6 0 0027.6 16 11.6 11.6 0 0016 4.4z" fill="#25d366"/>
+                    <path d="M12.11 10.3c-.28-.624-.574-.636-.84-.647-.218-.009-.467-.008-.716-.008-.25 0-.655.094-.998.468-.343.375-1.31 1.28-1.31 3.12s1.342 3.621 1.53 3.87c.187.25 2.606 4.15 6.41 5.653 3.17 1.249 3.805 1.001 4.49.939.686-.062 2.212-.906 2.524-1.78.312-.874.312-1.622.218-1.78-.093-.156-.343-.25-.717-.437-.374-.187-2.212-1.093-2.555-1.218-.343-.125-.593-.187-.843.187-.25.375-.967 1.218-1.185 1.468-.218.25-.436.281-.81.094-.374-.188-1.58-.583-3.01-1.858-1.113-.993-1.863-2.218-2.082-2.593-.218-.374-.023-.578.164-.765.168-.168.374-.437.562-.656.187-.218.25-.375.374-.624.125-.25.063-.468-.031-.656-.094-.187-.822-2.04-1.155-2.78z" fill="#fff"/>
+                </svg>
+            </div>
+            <div class="whatsapp-info">
+                <h3>🚨 Emergency WhatsApp Alert</h3>
+                <p>Send an instant SOS message to campus emergency coordinator</p>
+                <div class="wa-number">+91 91088 09416</div>
+            </div>
+            <a id="wa-send-btn" class="whatsapp-btn" href="#" onclick="sendWhatsAppAlert(event)" target="_blank" rel="noopener">
+                <span class="wa-pulse">
+                    <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2C8.268 2 2 8.268 2 16c0 2.478.675 4.8 1.848 6.793L2 30l7.395-1.82A13.93 13.93 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2z" fill="rgba(255,255,255,0.3)"/>
+                        <path d="M12.11 10.3c-.28-.624-.574-.636-.84-.647-.218-.009-.467-.008-.716-.008-.25 0-.655.094-.998.468-.343.375-1.31 1.28-1.31 3.12s1.342 3.621 1.53 3.87c.187.25 2.606 4.15 6.41 5.653 3.17 1.249 3.805 1.001 4.49.939.686-.062 2.212-.906 2.524-1.78.312-.874.312-1.622.218-1.78-.093-.156-.343-.25-.717-.437-.374-.187-2.212-1.093-2.555-1.218-.343-.125-.593-.187-.843.187-.25.375-.967 1.218-1.185 1.468-.218.25-.436.281-.81.094-.374-.188-1.58-.583-3.01-1.858-1.113-.993-1.863-2.218-2.082-2.593-.218-.374-.023-.578.164-.765.168-.168.374-.437.562-.656.187-.218.25-.375.374-.624.125-.25.063-.468-.031-.656-.094-.187-.822-2.04-1.155-2.78z" fill="#fff"/>
+                    </svg>
+                </span>
+                Send SOS via WhatsApp
+            </a>
+        </div>
+
+        <div class="card fade-up">
+            <div class="card-label"><span class="dot"></span>Step 5 — Live JSON Output</div>
+            <div class="json-wrap">
+                <pre
+                    id="json-output"><span style="color:var(--muted)">// Select a disaster to generate JSON output...</span></pre>
+            </div>
+            <button class="json-copy-btn" onclick="copyJSON()">📋 Copy JSON</button>
+        </div>
+
+    </main>
+
+    <footer>
+        SafeCampus &copy; 2025 — Civic Tech &amp; Disaster Management Hackathon Project<br />
+        <span
+            style="color:#eab308;font-weight:800;font-size:1.1rem;letter-spacing:.05em;font-family:'Syne',sans-serif;">Developed
+            by Syntax Squad</span>
+    </footer>
+
+    <script>
+        /* ══════════════════════════════════════════════
+           ⚙️  CONFIG
+           ─────────────────────────────────────────────
+           EmailJS (free 200 emails/month):
+             1. Sign up at https://www.emailjs.com
+             2. Create a Gmail service → get SERVICE_ID
+             3. Create template with vars: {{to_name}}, {{to_email}}, {{otp_code}}
+             4. Copy Public Key from Account → API Keys
+        
+           Google OAuth (free):
+             1. Go to https://console.cloud.google.com
+             2. Create project → APIs → Credentials → OAuth 2.0 Client ID
+             3. Add your domain to "Authorized JavaScript origins"
+             4. Copy the Client ID
+        ══════════════════════════════════════════════ */
+        const CONFIG = {
+            EMAILJS_PUBLIC_KEY: 'YOUR_EMAILJS_PUBLIC_KEY',
+            EMAILJS_SERVICE_ID: 'YOUR_SERVICE_ID',
+            EMAILJS_TEMPLATE_ID: 'YOUR_TEMPLATE_ID',
+            GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'
+        };
+
+        // Init EmailJS
+        try { emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY); } catch (e) { }
+
+        /* ══════════════════════════════════════════════
+           DATA
+        ══════════════════════════════════════════════ */
+        const DISASTERS = {
+            EARTHQUAKE: { icon: '🌍', color: '#f97316', glow: 'rgba(249,115,22,0.2)', subtitle: 'Seismic event detected. Act immediately.', actions: ['DROP, COVER, and HOLD ON under a sturdy desk or table', 'Stay away from windows, exterior walls and heavy objects', 'If outdoors, move to open space away from buildings', 'After shaking stops, check for injuries and hazards', 'Use stairs only — never elevators during or after tremors'], evacuationQueue: ['Assembly Point A', 'Main Corridor', 'Ground Floor Exit', 'Parking Lot', 'Open Field'] },
+            FIRE: { icon: '🔥', color: '#ef4444', glow: 'rgba(239,68,68,0.2)', subtitle: 'Fire emergency active. Evacuate immediately.', actions: ['Trigger the nearest fire alarm immediately', 'Evacuate via designated emergency stairs — no elevators', 'Crawl low under smoke, cover mouth with cloth', 'Feel doors before opening — if hot, use alternate route', 'Assemble at the designated fire muster point'], evacuationQueue: ['Nearest Stairwell', 'Ground Floor Lobby', 'Fire Exit Door', 'Muster Zone', 'Safe Distance'] },
+            FLOOD: { icon: '🌊', color: '#3b82f6', glow: 'rgba(59,130,246,0.2)', subtitle: 'Flood warning active. Move to higher ground.', actions: ['Move to the highest floor or elevated ground immediately', 'Turn off all electricity at the main switch', 'Avoid walking or driving through moving flood water', 'Do not touch electrical equipment if wet or standing in water', 'Listen to official radio or alerts for further instructions'], evacuationQueue: ['Ground Floor', 'Staircase to 3rd Floor', 'Rooftop Access', 'Helicopter Pad', 'Rescue Point'] },
+            CYCLONE: { icon: '🌀', color: '#8b5cf6', glow: 'rgba(139,92,246,0.2)', subtitle: 'Cyclone warning issued. Seek shelter now.', actions: ['Stay indoors away from windows and glass doors', 'Secure or bring in all loose outdoor objects', 'Move to an interior room on the lowest stable floor', 'Monitor official weather alerts and emergency broadcasts', 'Keep emergency kit accessible — power outages are likely'], evacuationQueue: ['Interior Room', 'Reinforced Corridor', 'Basement Shelter', 'Community Hall', 'Relief Camp'] }
+        };
+
+        const CHECKLIST_ITEMS = [
+            { id: 'routes', label: '🗺️  Know all evacuation routes' },
+            { id: 'kit', label: '🎒  Emergency kit assembled & stocked' },
+            { id: 'contacts', label: '📞  Emergency contacts saved on phone' },
+            { id: 'firstaid', label: '🩹  First aid knowledge & training' },
+            { id: 'torch', label: '🔦  Flashlight & spare batteries available' }
+        ];
+
+        const EMERGENCY_CONTACTS = [
+            { name: 'Police', number: '100', icon: '👮', bg: '#1e3a5f' },
+            { name: 'Fire Dept.', number: '101', icon: '🚒', bg: '#5f1e1e' },
+            { name: 'Ambulance', number: '108', icon: '🚑', bg: '#1e5f2a' },
+            { name: 'Disaster Mgmt', number: '1078', icon: '🏛️', bg: '#3b2a5f' }
+        ];
+
+        /* ══════════════════════════════════════════════
+           STATE
+        ══════════════════════════════════════════════ */
+        let state = { disasterType: null, checkedItems: new Set(), queueRunning: false, user: null, currentOTP: null, otpEmail: null, otpExpiry: null };
+
+        /* ══════════════════════════════════════════════
+           LIVE CLOCK
+        ══════════════════════════════════════════════ */
+        const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+        const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        function updateClock() {
+            const n = new Date();
+            document.getElementById('live-day').textContent = DAYS[n.getDay()];
+            document.getElementById('live-date').textContent = `${n.getDate()} ${MONTHS[n.getMonth()]} ${n.getFullYear()}`;
+            const h = String(n.getHours()).padStart(2, '0'), m = String(n.getMinutes()).padStart(2, '0'), s = String(n.getSeconds()).padStart(2, '0');
+            document.getElementById('live-time').textContent = `${h}:${m}:${s}`;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        /* ══════════════════════════════════════════════
+           MODAL
+        ══════════════════════════════════════════════ */
+        function openModal() { document.getElementById('auth-modal').classList.add('open') }
+        function closeModal() { document.getElementById('auth-modal').classList.remove('open') }
+        document.getElementById('auth-modal').addEventListener('click', function (e) { if (e.target === this) closeModal() });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'signup') || (i === 1 && tab === 'login')));
+            document.getElementById('panel-signup').classList.toggle('active', tab === 'signup');
+            document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+        }
+
+        /* ══════════════════════════════════════════════
+           OTP HELPERS
+        ══════════════════════════════════════════════ */
+        function generateOTP() { return String(Math.floor(100000 + Math.random() * 900000)) }
+        function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) }
+        function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = `auth-msg ${type}` }
+        function getOTPValue(gid) { return [...document.querySelectorAll(`#${gid} .otp-box`)].map(i => i.value).join('') }
+        function focusFirstOTP(gid) { document.querySelector(`#${gid} .otp-box`)?.focus() }
+
+        /* Wire OTP boxes */
+        window.addEventListener('load', () => {
+            ['otp-group', 'login-otp-group'].forEach(gid => {
+                const boxes = [...document.querySelectorAll(`#${gid} .otp-box`)];
+                boxes.forEach((box, i) => {
+                    box.addEventListener('input', () => {
+                        box.value = box.value.replace(/\D/g, '').slice(-1);
+                        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+                    });
+                    box.addEventListener('keydown', e => { if (e.key === 'Backspace' && !box.value && i > 0) boxes[i - 1].focus() });
+                    box.addEventListener('paste', e => {
+                        e.preventDefault();
+                        const t = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                        boxes.forEach((b, j) => { if (t[j]) b.value = t[j] });
+                        boxes[Math.min(t.length, boxes.length - 1)].focus();
+                    });
+                });
+            });
+        });
+
+        /* ══════════════════════════════════════════════
+           EMAIL OTP via EmailJS
+        ══════════════════════════════════════════════ */
+        async function sendOTPEmail(name, email, otp) {
+            const isDemo = CONFIG.EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY';
+            if (isDemo) {
+                console.log(`%c[SafeCampus OTP] ${email} → ${otp}`, 'background:#1a2236;color:#22c55e;padding:4px 8px;border-radius:4px;font-weight:bold;font-size:14px');
+                await new Promise(r => setTimeout(r, 1200)); // simulate send delay
+                return { ok: true, demo: true };
+            }
+            try {
+                await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, { to_name: name || 'User', to_email: email, otp_code: otp, app_name: 'SafeCampus' });
+                return { ok: true };
+            } catch (err) { return { ok: false, error: err } }
+        }
+
+        /* SIGNUP: Send */
+        async function sendOTP() {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            if (!name) return showMsg('signup-msg', '⚠️ Please enter your name.', 'error');
+            if (!isValidEmail(email)) return showMsg('signup-msg', '⚠️ Enter a valid email address.', 'error');
+
+            const btn = document.getElementById('send-otp-btn');
+            btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Sending OTP...';
+
+            const otp = generateOTP();
+            state.currentOTP = otp; state.otpEmail = email; state.otpExpiry = Date.now() + 300000;
+
+            const r = await sendOTPEmail(name, email, otp);
+            btn.disabled = false; btn.innerHTML = 'Send OTP →';
+
+            if (r.ok) {
+                document.getElementById('otp-email-display').textContent = email;
+                document.getElementById('signup-step1').classList.remove('active');
+                document.getElementById('signup-step2').classList.add('active');
+                if (r.demo) showMsg('otp-msg', `🔧 Demo mode — OTP is ${otp} (also in browser console). Add EmailJS keys for real emails.`, 'info');
+                startResendTimer(); focusFirstOTP('otp-group');
+            } else { showMsg('signup-msg', '❌ Failed to send OTP. Check EmailJS config in the code.', 'error') }
+        }
+
+        /* SIGNUP: Verify */
+        function verifyOTP() {
+            const entered = getOTPValue('otp-group');
+            if (entered.length < 6) return showMsg('otp-msg', '⚠️ Enter all 6 digits.', 'error');
+            if (Date.now() > state.otpExpiry) return showMsg('otp-msg', '⏰ OTP expired. Please resend.', 'error');
+            if (entered !== state.currentOTP) return showMsg('otp-msg', '❌ Incorrect OTP. Try again.', 'error');
+            loginUser({ name: document.getElementById('signup-name').value.trim(), email: state.otpEmail, avatar: null });
+        }
+
+        /* LOGIN: Send */
+        async function sendLoginOTP() {
+            const email = document.getElementById('login-email').value.trim();
+            if (!isValidEmail(email)) return showMsg('login-msg', '⚠️ Enter a valid email address.', 'error');
+
+            const btn = document.getElementById('send-login-otp-btn');
+            btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Sending OTP...';
+
+            const otp = generateOTP();
+            state.currentOTP = otp; state.otpEmail = email; state.otpExpiry = Date.now() + 300000;
+
+            const r = await sendOTPEmail('User', email, otp);
+            btn.disabled = false; btn.innerHTML = 'Send Login OTP →';
+
+            if (r.ok) {
+                document.getElementById('login-email-display').textContent = email;
+                document.getElementById('login-step1').classList.remove('active');
+                document.getElementById('login-step2').classList.add('active');
+                if (r.demo) showMsg('login-otp-msg', `🔧 Demo mode — OTP is ${otp} (also in browser console).`, 'info');
+                focusFirstOTP('login-otp-group');
+            } else { showMsg('login-msg', '❌ Failed to send OTP. Check EmailJS config.', 'error') }
+        }
+
+        /* LOGIN: Verify */
+        function verifyLoginOTP() {
+            const entered = getOTPValue('login-otp-group');
+            if (entered.length < 6) return showMsg('login-otp-msg', '⚠️ Enter all 6 digits.', 'error');
+            if (Date.now() > state.otpExpiry) return showMsg('login-otp-msg', '⏰ OTP expired. Please resend.', 'error');
+            if (entered !== state.currentOTP) return showMsg('login-otp-msg', '❌ Incorrect OTP. Try again.', 'error');
+            loginUser({ name: state.otpEmail.split('@')[0], email: state.otpEmail, avatar: null });
+        }
+
+        /* RESEND */
+        let resendInterval;
+        async function resendOTP() {
+            const otp = generateOTP();
+            state.currentOTP = otp; state.otpExpiry = Date.now() + 300000;
+            const name = document.getElementById('signup-name')?.value.trim() || 'User';
+            const r = await sendOTPEmail(name, state.otpEmail, otp);
+            if (r.ok) {
+                if (r.demo) showMsg('otp-msg', `🔧 Demo — new OTP is ${otp}`, 'info');
+                else showMsg('otp-msg', '✅ New OTP sent!', 'success');
+                startResendTimer();
+            }
+        }
+
+        function startResendTimer() {
+            const link = document.getElementById('resend-link'), timer = document.getElementById('resend-timer');
+            let s = 30; link.style.display = 'none'; timer.style.display = 'inline';
+            clearInterval(resendInterval);
+            resendInterval = setInterval(() => {
+                timer.textContent = ` Resend in ${s}s`; s--;
+                if (s < 0) { clearInterval(resendInterval); link.style.display = 'inline'; timer.style.display = 'none' }
+            }, 1000);
+        }
+
+        /* ══════════════════════════════════════════════
+           GOOGLE SIGN-IN (Real OAuth via Google Identity Services)
+        ══════════════════════════════════════════════ */
+        function signInWithGoogle() {
+            if (CONFIG.GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+                // Demo fallback — simulates a real Google user
+                loginUser({ name: 'Demo Google User', email: 'demo@gmail.com', avatar: null, fromGoogle: true });
+                return;
+            }
+            google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: handleGoogleCredential });
+            google.accounts.id.prompt();
+        }
+
+        function handleGoogleCredential(response) {
+            try {
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                loginUser({ name: payload.name, email: payload.email, avatar: payload.picture, fromGoogle: true });
+            } catch (e) { console.error('Google credential error', e) }
+        }
+
+        /* ══════════════════════════════════════════════
+           SESSION
+        ══════════════════════════════════════════════ */
+        function loginUser(user) {
+            state.user = user; closeModal();
+            const av = document.getElementById('header-avatar');
+            if (user.avatar) av.innerHTML = `<img src="${user.avatar}" alt="avatar"/>`;
+            else av.textContent = user.name.charAt(0).toUpperCase();
+            document.getElementById('header-auth-label').textContent = user.name.split(' ')[0];
+            document.getElementById('auth-btn').onclick = signOut;
+        }
+
+        function signOut() {
+            if (!confirm('Sign out of SafeCampus?')) return;
+            state.user = null;
+            document.getElementById('header-avatar').textContent = '?';
+            document.getElementById('header-auth-label').textContent = 'Sign Up';
+            document.getElementById('auth-btn').onclick = openModal;
+        }
+
+        /* ══════════════════════════════════════════════
+           CORE APP
+        ══════════════════════════════════════════════ */
+        function getSafetyActions(t) { return DISASTERS[t]?.actions || [] }
+        function calculatePreparednessScore() { return Math.round((state.checkedItems.size / CHECKLIST_ITEMS.length) * 100) }
+
+        function generateJSON() {
+            const score = calculatePreparednessScore();
+            const payload = { disaster_type: state.disasterType || 'NONE', preparedness_score: score, safety_actions: getSafetyActions(state.disasterType), emergency_contacts: EMERGENCY_CONTACTS.map(c => c.name), status: score >= 70 ? 'Prepared' : 'Needs Improvement' };
+            console.log('[SafeCampus JSON]', JSON.stringify(payload, null, 2));
+            return payload;
+        }
+
+        async function runEvacuationQueue() {
+            if (state.queueRunning || !state.disasterType) return;
+            state.queueRunning = true;
+            const queue = [...DISASTERS[state.disasterType].evacuationQueue];
+            const track = document.getElementById('queue-track'), log = document.getElementById('queue-log');
+            track.innerHTML = queue.map((s, i) => `<div class="q-node" id="qn-${i}">${s}</div>`).join('');
+            log.textContent = '⏳ Initialising evacuation route queue...';
+            await sleep(600);
+            async function processQueue(rem, idx) {
+                if (!rem.length) { log.textContent = '✅ All checkpoints cleared. Evacuation complete!'; state.queueRunning = false; return }
+                const [cur, ...rest] = rem, node = document.getElementById(`qn-${idx}`);
+                if (node) node.classList.add('processing');
+                log.textContent = `🔄 Processing [${idx + 1}/${queue.length}]: ${cur}`;
+                await sleep(900);
+                if (node) { node.classList.remove('processing'); node.classList.add('done') }
+                await processQueue(rest, idx + 1);
+            }
+            await processQueue(queue, 0);
+        }
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
+
+        /* ══════════════════════════════════════════════
+           UI
+        ══════════════════════════════════════════════ */
+        function updateUI() {
+            const dis = state.disasterType;
+            if (dis) { document.documentElement.style.setProperty('--dis-hue', DISASTERS[dis].color); document.documentElement.style.setProperty('--dis-glow', DISASTERS[dis].glow) }
+            else { document.documentElement.style.setProperty('--dis-hue', '#f97316'); document.documentElement.style.setProperty('--dis-glow', 'rgba(249,115,22,0.18)') }
+            document.getElementById('logo-icon').textContent = dis ? DISASTERS[dis].icon : '🛡️';
+            document.getElementById('modal-logo').textContent = dis ? DISASTERS[dis].icon : '🛡️';
+            const banner = document.getElementById('alert-banner');
+            if (dis) { banner.classList.add('visible'); document.getElementById('alert-text').textContent = `⚠️ ${dis} scenario active — ${DISASTERS[dis].subtitle}` }
+            else banner.classList.remove('visible');
+            updateSafetyPanel(); updateScore(); renderJSON();
+        }
+
+        function updateSafetyPanel() {
+            const dis = state.disasterType, panel = document.getElementById('safety-panel');
+            if (!dis) { panel.classList.remove('visible'); return }
+            panel.classList.add('visible');
+            const d = DISASTERS[dis];
+            document.getElementById('dis-icon').textContent = d.icon;
+            document.getElementById('dis-title').textContent = dis;
+            document.getElementById('dis-subtitle').textContent = d.subtitle;
+            document.getElementById('actions-list').innerHTML = d.actions.map((a, i) => `<li class="action-item"><div class="action-num">${i + 1}</div><div class="action-text">${a}</div></li>`).join('');
+            document.getElementById('queue-track').innerHTML = '';
+            document.getElementById('queue-log').textContent = 'Press Simulate to run the evacuation queue algorithm.';
+            state.queueRunning = false;
+        }
+
+        function updateScore() {
+            const score = calculatePreparednessScore(), circ = 163.36, arc = document.getElementById('ring-arc');
+            arc.style.strokeDashoffset = circ - (score / 100) * circ;
+            arc.style.stroke = score >= 70 ? 'var(--success)' : score >= 40 ? 'var(--warn)' : 'var(--danger)';
+            document.getElementById('ring-pct').textContent = score + '%';
+            document.getElementById('score-bar').style.width = score + '%';
+            document.getElementById('score-label').textContent = score === 0 ? 'Not Started' : score === 100 ? '🎉 Fully Prepared!' : score >= 70 ? 'Well Prepared' : 'Needs Improvement';
+            document.getElementById('score-desc').textContent = `${state.checkedItems.size} of ${CHECKLIST_ITEMS.length} items — ${score}% preparedness`;
+            const badge = document.getElementById('status-badge');
+            badge.textContent = state.disasterType ? (score >= 70 ? 'Prepared' : 'Needs Improvement') : 'Standby';
+            badge.className = 'status-badge' + (state.disasterType ? (score >= 70 ? ' prepared' : ' needs-improvement') : '');
+        }
+
+        function renderJSON() {
+            const p = generateJSON();
+            function hl(v) {
+                if (typeof v === 'string') return `<span class="json-str">"${v}"</span>`;
+                if (typeof v === 'number') return `<span class="json-num">${v}</span>`;
+                if (Array.isArray(v)) return `[\n${v.map(x => '    ' + hl(x)).join(',\n')}\n  ]`;
+                return String(v);
+            }
+            document.getElementById('json-output').innerHTML = `{\n${Object.entries(p).map(([k, v]) => `  <span class="json-key">"${k}"</span>: ${hl(v)}`).join(',\n')}\n}`;
+        }
+
+        function copyJSON() {
+            navigator.clipboard.writeText(JSON.stringify(generateJSON(), null, 2)).then(() => {
+                const btn = document.querySelector('.json-copy-btn');
+                btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = '📋 Copy JSON', 1800);
+            });
+        }
+
+        /* ══════════════════════════════════════════════
+           STATIC RENDERS
+        ══════════════════════════════════════════════ */
+        function renderChecklist() {
+            document.getElementById('checklist').innerHTML = CHECKLIST_ITEMS.map(item => `
+    <div class="check-item" id="ci-${item.id}" onclick="toggleCheck('${item.id}')">
+      <div class="check-box" id="box-${item.id}"></div>
+      <div class="check-label">${item.label}</div>
+    </div>`).join('');
+        }
+
+        function toggleCheck(id) {
+            const item = document.getElementById(`ci-${id}`), box = document.getElementById(`box-${id}`);
+            if (state.checkedItems.has(id)) { state.checkedItems.delete(id); item.classList.remove('checked'); box.innerHTML = '' }
+            else { state.checkedItems.add(id); item.classList.add('checked'); box.innerHTML = '<svg width="13" height="10" viewBox="0 0 13 10" fill="none"><polyline points="1.5,5 5,8.5 11.5,1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
+            updateUI();
+        }
+
+        function renderContacts() {
+            document.getElementById('contacts-grid').innerHTML = EMERGENCY_CONTACTS.map(c => `
+    <div class="contact-card">
+      <div class="contact-icon" style="background:${c.bg}">${c.icon}</div>
+      <div class="contact-name">${c.name}</div>
+      <div class="contact-number">${c.number}</div>
+    </div>`).join('');
+        }
+
+        /* ══════════════════════════════════════════════
+           EVENTS
+        ══════════════════════════════════════════════ */
+        function handleDisasterChange(val) {
+            state.disasterType = val || null;
+            document.getElementById('disaster-select').value = val || '';
+            document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.disaster === val));
+            updateUI();
+        }
+
+        document.getElementById('disaster-select').addEventListener('change', function () { handleDisasterChange(this.value) });
+        document.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => handleDisasterChange(chip.classList.contains('active') ? '' : chip.dataset.disaster)));
+
+        const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target) } }), { threshold: .08 });
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+        /* ══════════════════════════════════════════════
+           WHATSAPP EMERGENCY
+        ══════════════════════════════════════════════ */
+        function sendWhatsAppAlert(e) {
+            e.preventDefault();
+            const dis = state.disasterType;
+            const score = calculatePreparednessScore();
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            let msg = `🚨 *SAFECAMPUS EMERGENCY ALERT* 🚨\n\n`;
+            msg += `📍 *Campus Emergency SOS*\n`;
+            msg += `🕐 Time: ${timeStr}, ${dateStr}\n`;
+
+            if (dis) {
+                const d = { EARTHQUAKE: '🌍', FIRE: '🔥', FLOOD: '🌊', CYCLONE: '🌀' };
+                msg += `⚠️ Disaster Type: ${d[dis] || ''} *${dis}*\n`;
+                msg += `📊 Preparedness Score: *${score}%*\n`;
+                msg += `\n🆘 *Immediate assistance required!*\n`;
+                msg += `Please respond to this emergency immediately.\n`;
+            } else {
+                msg += `⚠️ *General Campus Emergency*\n`;
+                msg += `📊 Preparedness Score: *${score}%*\n`;
+                msg += `\n🆘 *Immediate assistance required!*\n`;
+            }
+
+            msg += `\n— Sent via SafeCampus Disaster Preparedness System`;
+
+            const phone = '919108809416';
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        /* ══════════════════════════════════════════════
+           THEME TOGGLE
+        ══════════════════════════════════════════════ */
+        function toggleTheme() {
+            const root = document.documentElement;
+            const isLight = root.classList.toggle('light');
+            const thumb = document.getElementById('theme-toggle-thumb');
+            const bg = document.getElementById('theme-toggle-bg');
+            thumb.textContent = isLight ? '🌙' : '☀️';
+            bg.textContent = isLight ? '☀️' : '🌙';
+            localStorage.setItem('sc-theme', isLight ? 'light' : 'dark');
+        }
+
+        // Restore saved theme
+        (function() {
+            const saved = localStorage.getItem('sc-theme');
+            if (saved === 'light') {
+                document.documentElement.classList.add('light');
+                const thumb = document.getElementById('theme-toggle-thumb');
+                const bg = document.getElementById('theme-toggle-bg');
+                if (thumb) thumb.textContent = '🌙';
+                if (bg) bg.textContent = '☀️';
+            }
+        })();
+
+        /* INIT */
+        renderChecklist();
+        renderContacts();
+        updateUI();
+    </script>
+</body>
+
+</html>
