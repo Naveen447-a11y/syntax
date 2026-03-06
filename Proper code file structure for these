@@ -1,0 +1,25 @@
+SafeCampus/
+│
+├── index.html              # Main entry page of the application
+├── README.md               # Project documentation
+├── LICENSE                 # Optional open-source license
+│
+├── css/
+│   └── styles.css          # Main styling file
+│
+├── js/
+│   └── script.js           # Disaster logic and checklist functionality
+│
+├── data/
+│   └── disasters.json      # Disaster actions and emergency contacts
+│
+├── assets/
+│   ├── images/             # Icons, diagrams, screenshots
+│   └── icons/              # Disaster icons (fire, flood, etc.)
+│
+├── components/
+│   ├── checklist.html      # Preparedness checklist UI component
+│   └── scenario.html       # Scenario display component
+│
+└── docs/
+    └── screenshots/        # Images used in README
